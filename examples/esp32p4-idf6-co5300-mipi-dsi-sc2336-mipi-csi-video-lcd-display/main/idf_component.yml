@@ -1,0 +1,9 @@
+dependencies:
+  idf: ">=5.5"
+
+  esp_video:
+    version: "2.4.*"
+    public: true
+  espressif/esp_lcd_co5300:
+    version: 2.0.*
+    public: true
