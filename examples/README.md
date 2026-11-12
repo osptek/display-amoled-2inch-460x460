@@ -13,6 +13,7 @@ They are reference code; adjust pins, backlight, touch and other settings to you
 | [`esp32p4-idf6-co5300-mipi-dsi-sc2336-mipi-csi-video-lcd-display`](./esp32p4-idf6-co5300-mipi-dsi-sc2336-mipi-csi-video-lcd-display/) | ESP32-P4 · ESP-IDF 6 | CO5300 | MIPI | 摄像头实时显示 / camera live view |
 | [`esp32p4-idf6-co5300-mipi-lvgl-common-demo-te`](./esp32p4-idf6-co5300-mipi-lvgl-common-demo-te/) | ESP32-P4 · ESP-IDF 6 | CO5300 | MIPI | LVGL 综合演示、TE 防撕裂 / LVGL demo, TE tear-free |
 | [`esp32p4-idf6-co5300-mipi-lvgl-port-lvgl9`](./esp32p4-idf6-co5300-mipi-lvgl-port-lvgl9/) | ESP32-P4 · ESP-IDF 6 | CO5300 | MIPI | LVGL 9 / LVGL 9 |
+| [`esp32p4c5-esphome-co5300-mipi-lvgl-esphosted`](./esp32p4c5-esphome-co5300-mipi-lvgl-esphosted/) | ESP32-P4 + ESP32-C5 · ESPHome | CO5300 + CST820 | MIPI | ESPHome、LVGL、触摸、C5 Wi-Fi (ESP-Hosted) / ESPHome, LVGL, touch, Wi-Fi via C5 (ESP-Hosted) |
 | [`esp32s3-idf5-co5300-qspi-decoder-spiffs-lvgl9`](./esp32s3-idf5-co5300-qspi-decoder-spiffs-lvgl9/) | ESP32-S3 · ESP-IDF 5 | CO5300 | QSPI | 图片解码显示、LVGL 9 / image decode, LVGL 9 |
 | [`esp32s3-idf5-co5300-qspi-eaf-boot-animation-spiffs-lvgl9`](./esp32s3-idf5-co5300-qspi-eaf-boot-animation-spiffs-lvgl9/) | ESP32-S3 · ESP-IDF 5 | CO5300 | QSPI | EAF 开机动画、LVGL 9 / EAF boot animation, LVGL 9 |
 | [`esp32s3-idf5-co5300-qspi-eaf-player-spiffs-lvgl9`](./esp32s3-idf5-co5300-qspi-eaf-player-spiffs-lvgl9/) | ESP32-S3 · ESP-IDF 5 | CO5300 | QSPI | EAF 动画播放、LVGL 9 / EAF animation player, LVGL 9 |
