@@ -1,0 +1,297 @@
+# osptek 2.0" 460x460 AMOLED (CO5300 over MIPI DSI, CST820 touch) on the osptek ESP32-P4 +
+# ESP32-C5 core board, with ESPHome, LVGL and Wi-Fi through the C5 (ESP-Hosted over SDIO).
+# See README_EN.md (English) or README.md (中文) in this folder for setup, secrets and the
+# FPC cable warning.
+
+esphome:
+  name: osptek-esp32-p4-amoled
+  friendly_name: osptek esp32 p4 amoled
+
+esp32:
+  variant: esp32p4
+  engineering_sample: false
+  flash_size: 16MB
+  framework:
+    type: esp-idf
+    # INFO shows ESP-Hosted / Wi-Fi events from the C5 (the default, ERROR, hides them).
+    # Handy while bringing the board up; set it back to ERROR once Wi-Fi works.
+    log_level: INFO
+    advanced:
+      # Saves IRAM
+      flash_chip: generic
+    # ESP-Hosted host library: ESPHome 2026.10's default, 2.12.13, which matches the C5
+    # firmware under `update:` below. ESP-Hosted 3.1.0 on both sides did not work: the C5 never
+    # sent its INIT event and the task watchdog fired every boot.
+
+logger:
+  # Logs on UART0 (the core board's USB-UART bridge port). If you connect to the P4's own USB
+  # port instead, use USB_SERIAL_JTAG.
+  hardware_uart: UART0
+
+psram:
+  speed: 200MHZ
+  mode: hex
+
+api:
+  encryption:
+    key: !secret osptek_esp32_p4_amoled__encryption_key
+
+ota:
+  - platform: esphome
+
+esp32_hosted:
+  # Pinout from https://github.com/osptek/esp32-p4c5-core-board: C5 CHIP_PU on GPIO54.
+  # (GPIO6 goes to C5 GPIO2 for host wakeup; it isn't used here.)
+  type: sdio
+  variant: ESP32C5
+  reset_pin: GPIO54
+  active_high: true
+  clk_pin: GPIO18
+  cmd_pin: GPIO19
+  d0_pin: GPIO14
+  d1_pin: GPIO15
+  d2_pin: GPIO16
+  d3_pin: GPIO17
+  bus_width: 4
+  slot: 1
+  # The 40MHz default left about half of boots associated, with an address, but passing no
+  # traffic (DHCP never completed). 20MHz has been reliable.
+  sdio_frequency: 20MHz
+  use_psram: true
+
+wifi:
+  ssid: !secret wifi_ssid
+  password: !secret wifi_password
+  # The default light power save made ping replies 150-1150 ms; 4-13 ms without it
+  power_save_mode: none
+  # Through ESP-Hosted, fast_connect's reconnect to the saved access point always failed with
+  # "Authentication Failed" and then scanned anyway
+  fast_connect: false
+  # Optional fixed address. DHCP works; uncomment and set to suit your network if you want one.
+  # manual_ip:
+  #   static_ip: 192.168.1.41
+  #   gateway: 192.168.1.1
+  #   subnet: 255.255.255.0
+  #   dns1: 192.168.1.1
+  ap:
+    ssid: osptek-esp32-p4 Fallback Hotspot
+    password: !secret osptek_esp32_p4_amoled__ap_password
+
+captive_portal:
+
+web_server:
+  version: 3
+
+# ESP32-C5 co-processor firmware updates, flashed over the SDIO link. The P4 reads ESPHome's
+# ESP-Hosted manifest for the C5 and offers the newest version that isn't newer than the host
+# library (2.12.13 here); install it from Home Assistant or the web page.
+http_request:
+
+update:
+  - platform: esp32_hosted
+    type: http
+    id: c5_firmware
+    name: "ESP32-C5 Wi-Fi Firmware"
+    source: "https://esphome.github.io/esp-hosted-firmware/manifest/esp32c5.json"
+
+text_sensor:
+  - platform: wifi_info
+    ip_address:
+      name: "WiFi IP Address"
+      entity_category: diagnostic
+    ssid:
+      name: "Connected SSID"
+      entity_category: diagnostic
+
+  # C5 firmware versions, read from the update entity: the newest suitable one in the manifest
+  # and what the C5 reports over ESP-Hosted
+  - platform: template
+    name: "C5 Firmware Available"
+    entity_category: diagnostic
+    icon: mdi:chip
+    update_interval: 60s
+    lambda: return id(c5_firmware).update_info.latest_version;
+  - platform: template
+    name: "C5 Firmware Installed"
+    entity_category: diagnostic
+    icon: mdi:chip
+    update_interval: 60s
+    lambda: return id(c5_firmware).update_info.current_version;
+
+  # OPTIONAL: mirror a Home Assistant switch on the button. Uncomment this, the matching blocks
+  # under `switch:` below, and change the entity_id. The device also needs "Allow the device to
+  # perform Home Assistant actions" turned on in Home Assistant.
+  # - platform: homeassistant
+  #   id: ha_switch_state
+  #   entity_id: switch.extension_light_switch
+  #   internal: true
+  #   on_value:
+  #     - if:
+  #         condition:
+  #           lambda: return x == "on";
+  #         then:
+  #           - switch.turn_on: demo_switch
+  #         else:
+  #           - switch.turn_off: demo_switch
+
+# The on-screen button as a switch: tapping it toggles this, and toggling it from Home
+# Assistant or the web page updates the button
+switch:
+  - platform: lvgl
+    widget: demo_btn
+    id: demo_switch
+    name: "Screen Button"
+    on_turn_on:
+      - lvgl.label.update: { id: demo_status, text: "On - tap to turn off", text_color: 0xFFC46B }
+      # OPTIONAL (Home Assistant switch):
+      # - homeassistant.action:
+      #     action: switch.turn_on
+      #     data: { entity_id: switch.extension_light_switch }
+    on_turn_off:
+      - lvgl.label.update: { id: demo_status, text: "Off - tap to turn on", text_color: 0x7FE7FF }
+      # OPTIONAL (Home Assistant switch):
+      # - homeassistant.action:
+      #     action: switch.turn_off
+      #     data: { entity_id: switch.extension_light_switch }
+
+# The MIPI DSI PHY's 2.5V supply (VDD_MIPI_DPHY) comes from the P4's internal LDO channel 3
+esp_ldo:
+  - channel: 3
+    voltage: 2.5V
+
+# Touch controller
+i2c:
+  sda: GPIO7
+  scl: GPIO8
+  frequency: 400kHz
+
+display:
+  - platform: mipi_dsi
+    id: amoled
+    model: CUSTOM
+    dimensions:
+      width: 460
+      height: 460
+    # Porches from osptek's ESP-IDF example. That uses 16MHz / 330Mbps; these lower values
+    # also work and are what this config has been tested with.
+    lanes: 1
+    lane_bit_rate: 320Mbps
+    pclk_frequency: 8MHz
+    hsync_back_porch: 72
+    hsync_pulse_width: 4
+    hsync_front_porch: 32
+    vsync_back_porch: 4
+    vsync_pulse_width: 2
+    vsync_front_porch: 6
+    color_order: rgb
+    pixel_mode: 16bit
+    transform: disabled
+    init_sequence:
+      # Software reset first: the panel's reset line isn't wired (the 15-pin cable has none),
+      # so without this a soft reset of the P4 leaves the panel dark until a power cycle
+      - [0x01]
+      - delay 120ms
+      - [0xFE, 0x00]
+      - [0x3A, 0x55]   # 16-bit colour
+      - [0x53, 0x20]
+      - [0x51, 0x99]   # brightness, 0x00-0xFF (~60% here)
+      - [0x63, 0xFF]
+      - [0x2A, 0x00, 0x0A, 0x01, 0xD5]   # columns 10-469: the panel's 460 visible columns
+      - [0x2B, 0x00, 0x00, 0x01, 0xCB]   # rows 0-459
+      - [0x11]         # sleep out
+      - delay 120ms
+      - [0x29]         # display on
+
+touchscreen:
+  - platform: cst816  # the CST820 at 0x15 on the panel's adapter board works with this driver
+    id: touch
+    display: amoled
+    on_touch:
+      - logger.log:
+          tag: touch
+          format: "Touch at x=%d y=%d"
+          args: [touch.x, touch.y]
+
+# 8x460 strip, #1B0A3C at the top to #003B5C at the bottom, ordered-dithered so every pixel is
+# an exact RGB565 colour (an LVGL gradient banded visibly at 16-bit colour). Made with:
+#   awk -v W=8 -v H=460 -v top=1B0A3C -v bot=003B5C -f tools/dithered_gradient.awk > images/osptek_bg_gradient.ppm
+image:
+  - platform: file
+    file: images/osptek_bg_gradient.ppm
+    id: bg_gradient
+    type: RGB565
+
+# One page with a big round on/off button: orange/pink when on, blue/teal when off.
+lvgl:
+  id: lvgl_comp
+  displays:
+    - amoled
+  touchscreens:
+    - touchscreen_id: touch
+  # AMOLED burn-in care: after 5 min without a touch, 10 s of snow (random pixels) and then the
+  # page again. Resuming resets the inactivity timer, so this repeats every 5 min while idle.
+  on_idle:
+    - timeout: 5min
+      then:
+        - lvgl.pause:
+            show_snow: true
+        - delay: 10s
+        - lvgl.resume:
+  pages:
+    - id: main_page
+      # Background: the dithered strip, tiled across the page
+      bg_color: 0x0E2350
+      bg_image_src: bg_gradient
+      bg_image_tiled: true
+      widgets:
+        - label:
+            align: TOP_MID
+            y: 52
+            text: "osptek"
+            text_font: montserrat_40
+            text_color: 0xFFFFFF
+        - label:
+            align: TOP_MID
+            y: 104
+            text: "2.0\" AMOLED 460x460"
+            text_font: montserrat_20
+            text_color: 0xB89CFF
+        - button:
+            id: demo_btn
+            align: CENTER
+            y: 24
+            width: 200
+            height: 200
+            radius: 100
+            checkable: true
+            # Off
+            bg_color: 0x2E6BFF
+            bg_grad_color: 0x00C2C7
+            bg_grad_dir: VER
+            border_width: 6
+            border_color: 0xFFFFFF
+            border_opa: 35%
+            shadow_width: 48
+            shadow_spread: 4
+            shadow_color: 0xFF6A00
+            shadow_opa: 0%
+            pressed:
+              border_opa: 100%
+            # On
+            checked:
+              bg_color: 0xFF8A00
+              bg_grad_color: 0xFF2E63
+              shadow_opa: 80%
+            widgets:
+              - label:
+                  align: CENTER
+                  text: ""  # LV_SYMBOL_POWER
+                  text_font: montserrat_48
+                  text_color: 0xFFFFFF
+        - label:
+            id: demo_status
+            align: BOTTOM_MID
+            y: -60
+            text: "Off - tap to turn on"
+            text_font: montserrat_24
+            text_color: 0x7FE7FF
