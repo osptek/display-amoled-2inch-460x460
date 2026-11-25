@@ -58,7 +58,7 @@ cd /home/jin/rk3506-work/rk3506_linux6.1_sdk_v1.2.0_evb/
 &i2c2 {
 	status = "okay";
 	pinctrl-names = "default";
-	pinctrl-0 = <&rm_io1_i2c2_scl &rm_io0_i2c2_sda>;
+	pinctrl-0 = <&rm_io4_i2c2_scl &rm_io5_i2c2_sda>;
 
     cst820: cst820@15 {
 		status = "okay";
