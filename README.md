@@ -1,5 +1,9 @@
 <p align="left"><img alt="OSPTEK" src="./images/logo.png" width="200" /></p>
 
+<p align="center">
+  <a href="https://yy.fyi/"><img alt="在线固件烧录" src="https://img.shields.io/badge/在线固件烧录-yy.fyi-0078D4?style=for-the-badge" /></a>
+</p>
+
 <h1 align="center">OSPTEK 2″ AMOLED 显示屏 460×460</h1>
 
 <p align="center"><b>AMOLED 模组 · 多版本索引</b></p>
