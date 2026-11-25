@@ -14,8 +14,6 @@ They are reference code; adjust pins, backlight, touch and other settings to you
 | [`esp32p4-idf6_co5300-mipi-460x460_osptek-boot-anim_lvgl9_tear-resistant`](./esp32p4-idf6_co5300-mipi-460x460_osptek-boot-anim_lvgl9_tear-resistant/) | ESP32-P4 · ESP-IDF 6 | CO5300 | MIPI | 开机动画+LVGL 9+防撕裂 / Boot Animation+LVGL 9+tear-free |
 | [`esp32p4c5-esphome-co5300-mipi-lvgl-esphosted`](./esp32p4c5-esphome-co5300-mipi-lvgl-esphosted/) | ESP32-P4 + ESP32-C5 · ESPHome | CO5300 + CST820 | MIPI | ESPHome、LVGL、触摸、C5 Wi-Fi (ESP-Hosted) / ESPHome, LVGL, touch, Wi-Fi via C5 (ESP-Hosted) |
 | [`esp32s3-idf5-co5300-qspi-decoder-spiffs-lvgl9`](./esp32s3-idf5-co5300-qspi-decoder-spiffs-lvgl9/) | ESP32-S3 · ESP-IDF 5 | CO5300 | QSPI | 图片解码显示、LVGL 9 / image decode, LVGL 9 |
-| [`esp32s3-idf5-co5300-qspi-eaf-boot-animation-spiffs-lvgl9`](./esp32s3-idf5-co5300-qspi-eaf-boot-animation-spiffs-lvgl9/) | ESP32-S3 · ESP-IDF 5 | CO5300 | QSPI | EAF 开机动画、LVGL 9 / EAF boot animation, LVGL 9 |
-| [`esp32s3-idf5-co5300-qspi-eaf-player-spiffs-lvgl9`](./esp32s3-idf5-co5300-qspi-eaf-player-spiffs-lvgl9/) | ESP32-S3 · ESP-IDF 5 | CO5300 | QSPI | EAF 动画播放、LVGL 9 / EAF animation player, LVGL 9 |
 | [`esp32s3-idf5-co5300-qspi-freetype-spiffs-lvgl9`](./esp32s3-idf5-co5300-qspi-freetype-spiffs-lvgl9/) | ESP32-S3 · ESP-IDF 5 | CO5300 | QSPI | FreeType 字体、LVGL 9 / FreeType fonts, LVGL 9 |
 | [`esp32s3-idf5-co5300-qspi-lottie-player-spiffs-lvgl9`](./esp32s3-idf5-co5300-qspi-lottie-player-spiffs-lvgl9/) | ESP32-S3 · ESP-IDF 5 | CO5300 | QSPI | Lottie 动画、LVGL 9 / Lottie animation, LVGL 9 |
 | [`esp32s3-idf5-co5300-qspi-lvgl-adapter-lvgl8`](./esp32s3-idf5-co5300-qspi-lvgl-adapter-lvgl8/) | ESP32-S3 · ESP-IDF 5 | CO5300 | QSPI | LVGL 8 / LVGL 8 |
@@ -23,6 +21,7 @@ They are reference code; adjust pins, backlight, touch and other settings to you
 | [`esp32s3-idf5-co5300-qspi-lvgl-adapter-lvgl9`](./esp32s3-idf5-co5300-qspi-lvgl-adapter-lvgl9/) | ESP32-S3 · ESP-IDF 5 | CO5300 | QSPI | LVGL 9 / LVGL 9 |
 | [`esp32s3-idf5-co5300-qspi-lvgl-adapter-lvgl9-te`](./esp32s3-idf5-co5300-qspi-lvgl-adapter-lvgl9-te/) | ESP32-S3 · ESP-IDF 5 | CO5300 | QSPI | LVGL 9、TE 防撕裂 / LVGL 9, TE tear-free |
 | [`esp32s3-idf5-co5300-qspi-lvgl8`](./esp32s3-idf5-co5300-qspi-lvgl8/) | ESP32-S3 · ESP-IDF 5 | CO5300 | QSPI | LVGL 8 / LVGL 8 |
+| [`rk3506-buildroot-co5300-mipi-460x460`](./rk3506-buildroot-co5300-mipi-460x460/) | Rockchip RK3506 · Linux | CO5300 | MIPI | 设备树与触摸驱动参考、I2C 触摸驱动添加指南 / Device tree and touch driver reference, I2C touch driver guide |
 | [`rpi5-lvgl-co5300-cst820-460x460`](./rpi5-lvgl-co5300-cst820-460x460/) | Raspberry Pi 5 | CO5300 + CST820 | — | LVGL、触摸 / LVGL, touch |
 | [`rpi5-panel-co5300-460x460`](./rpi5-panel-co5300-460x460/) | Raspberry Pi 5 | CO5300 | — | 面板驱动 / panel driver |
 | [`rpi5-panel-co5300-cst820-460x460`](./rpi5-panel-co5300-cst820-460x460/) | Raspberry Pi 5 | CO5300 + CST820 | — | 面板驱动、触摸 / panel driver, touch |

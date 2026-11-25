@@ -1,0 +1,174 @@
+#include <dt-bindings/display/drm_mipi_dsi.h>
+#include <dt-bindings/input/rk-input.h>
+#include <dt-bindings/suspend/rockchip-rk3506.h>
+
+/ {
+	vcc_mipi_pwren: vcc-mipi_pwren-regulator {
+		compatible = "regulator-fixed";
+		regulator-boot-on;
+		regulator-always-on;
+		regulator-name = "vcc_mipi_pwren";
+		enable-active-high;
+		gpio = <&gpio1 RK_PB0 GPIO_ACTIVE_HIGH>;
+		pinctrl-name = "default";
+		pinctrl-0 = <&mipi_pwren_gpio>;
+	};
+};
+
+&dsi {
+	status = "okay";
+	//rockchip,lane-rate = <1000>;
+	dsi_panel: panel@0 {
+		status = "okay";
+		compatible = "simple-panel-dsi";
+		reg = <0>;
+		backlight = <&backlight>;
+		// power-supply = <&vcc3v3_lcd_n>;
+		// reset-gpio = <&gpio1 RK_PB0 GPIO_ACTIVE_LOW>;
+		reset-delay-ms = <10>;
+		enable-delay-ms = <10>;
+		prepare-delay-ms = <10>;
+		unprepare-delay-ms = <10>;
+		disable-delay-ms = <60>;
+		//width-mm = <68>;
+		//height-mm = <121>;
+		dsi,flags = <(MIPI_DSI_MODE_VIDEO | MIPI_DSI_MODE_VIDEO_BURST |
+				  MIPI_DSI_MODE_LPM | MIPI_DSI_MODE_NO_EOT_PACKET)>;
+		dsi,format = <MIPI_DSI_FMT_RGB888>;
+		dsi,lanes  = <1>;
+
+        // 2.0-inch CO5300 (460x460)
+        panel-init-sequence = [
+			15 00 02 FE 00
+			15 00 02 3A 77
+			15 00 02 53 20
+			15 00 02 51 FF
+			15 00 02 63 FF
+			39 00 05 2A 00 0A 01 D5
+			39 00 05 2B 00 00 01 CB
+			05 78 01 11
+			05 00 01 29
+		];
+		
+	panel-exit-sequence = [
+			05 00 01 28
+			05 78 01 10
+		];
+
+		disp_timings0: display-timings {
+			native-mode = <&dsi_timing0>;
+			dsi_timing0: timing0 {
+				clock-frequency = <16000000>;//60fps
+
+				hactive = <460>;
+				vactive = <460>;
+
+				vsync-len = <2>;
+				vback-porch = <4>;
+				vfront-porch = <6>;
+
+				hsync-len = <4>;
+				hback-porch = <72>;
+				hfront-porch = <32>;
+
+				vsync-active = <0>;
+				hsync-active = <0>;
+				de-active = <0>;
+				pixelclk-active = <0>;
+			};
+		};
+
+		ports {
+			#address-cells = <1>;
+			#size-cells = <0>;
+
+			port@0 {
+				reg = <0>;
+				panel_in_dsi: endpoint {
+					remote-endpoint = <&dsi_out_panel>;
+					status = "okay";
+				};
+			};
+		};
+	};
+
+	ports {
+		#address-cells = <1>;
+		#size-cells = <0>;
+
+		port@1 {
+			reg = <1>;
+			dsi_out_panel: endpoint {
+				remote-endpoint = <&panel_in_dsi>;
+			};
+		};
+	};
+};
+
+&display_subsystem {
+	status = "okay";
+	logo-memory-region = <&drm_logo>;
+};
+
+&vop {
+	status = "okay";
+};
+
+&dsi_in_vop {
+	status = "okay";
+};
+
+&rgb_in_vop {
+	status = "disabled";
+};
+
+&route_dsi {
+	status = "okay";
+	//logo,rotate = <3>;
+};
+
+&route_rgb {
+	status = "disabled";
+};
+
+&dsi_dphy {
+	status = "okay";
+	/* 1-lane panel: keep D-PHY lane count aligned with dsi,lanes = <1> */
+	inno,lanes = <1>;
+};
+
+&backlight {
+	compatible = "pwm-backlight";
+	pwms = <&pwm0_4ch_2 0 10000 0>;
+	status = "okay";
+};
+
+// TOUCH
+&i2c2 {
+	status = "okay";
+	pinctrl-names = "default";
+	pinctrl-0 = <&rm_io4_i2c2_scl &rm_io5_i2c2_sda>;
+
+        cst820: cst820@15 {
+		status = "okay";
+		compatible = "hynitron,cst820";   /* 匹配 cst820_of_match */
+		reg = <0x15>;                     /* I2C 设备地址 */
+		pinctrl-names = "default";
+
+		touchscreen-size-x = <460>;       /* 匹配 2.0 寸 cst820 分辨率 */
+		touchscreen-size-y = <460>;
+
+		/* 坐标翻转/镜像（按需开启） */
+		// touchscreen-inverted-x;
+		// touchscreen-inverted-y;
+		// touchscreen-swapped-x-y;
+	};
+};
+
+&pinctrl {
+	mipi_lcd{
+		mipi_pwren_gpio: mipi_pwren_gpio {
+			rockchip,pins = <1 RK_PB0 RK_FUNC_GPIO &pcfg_pull_none>;
+		};
+	};
+};

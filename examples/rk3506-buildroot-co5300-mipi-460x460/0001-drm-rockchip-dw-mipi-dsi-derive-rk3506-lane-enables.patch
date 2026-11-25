@@ -1,0 +1,54 @@
+diff --git a/kernel-6.1/drivers/gpu/drm/rockchip/dw-mipi-dsi-rockchip.c b/kernel-6.1/drivers/gpu/drm/rockchip/dw-mipi-dsi-rockchip.c
+index 372a27e3b..22a1c2ca8 100644
+--- a/kernel-6.1/drivers/gpu/drm/rockchip/dw-mipi-dsi-rockchip.c
++++ b/kernel-6.1/drivers/gpu/drm/rockchip/dw-mipi-dsi-rockchip.c
+@@ -335,6 +335,7 @@ struct dw_mipi_dsi_rockchip {
+ 	u16 input_div;
+ 	u16 feedback_div;
+ 	u32 format;
++	u32 lanes;
+ 
+ 	struct dw_mipi_dsi *dmd;
+ 	const struct rockchip_dw_dsi_chip_data *cdata;
+@@ -467,9 +468,32 @@ static inline unsigned int ns2ui(struct dw_mipi_dsi_rockchip *dsi, int ns)
+ 
+ static void dw_mipi_dsi_phy_tx_config(struct dw_mipi_dsi_rockchip *dsi)
+ {
++	u32 lanecfg1 = dsi->cdata->lanecfg1;
++
++	/*
++	 * The RK3506 GRF bits statically enable both lane pads, while the
++	 * D-PHY only powers the lanes given by dsi,lanes. Enabling an unused
++	 * pad keeps its PPI stopstate from settling, which stalls HS
++	 * transmission (to_hs_tx), so derive the lane enables from the
++	 * configured lane count.
++	 */
++	if (dsi->cdata->soc_type == RK3506) {
++		u32 val = RK3506_DSI_PHY_ENABLE_LANE0;
++
++		if (dsi->lanes > 1)
++			val |= RK3506_DSI_PHY_ENABLE_LANE1;
++
++		lanecfg1 = HIWORD_UPDATE(val,
++					 RK3506_DSI_TURNDISABLE |
++					 RK3506_DSI_FORCERXMODE |
++					 RK3506_DSI_FORCETXSTOPMODE |
++					 RK3506_DSI_PHY_ENABLE_LANE0 |
++					 RK3506_DSI_PHY_ENABLE_LANE1);
++	}
++
+ 	if (dsi->cdata->lanecfg1_grf_reg)
+ 		regmap_write(dsi->grf_regmap, dsi->cdata->lanecfg1_grf_reg,
+-					      dsi->cdata->lanecfg1);
++					      lanecfg1);
+ 
+ 	if (dsi->cdata->lanecfg2_grf_reg)
+ 		regmap_write(dsi->grf_regmap, dsi->cdata->lanecfg2_grf_reg,
+@@ -668,6 +692,7 @@ dw_mipi_dsi_get_lane_mbps(void *priv_data, const struct drm_display_mode *mode,
+ 	int bpp, ret;
+ 
+ 	dsi->format = format;
++	dsi->lanes = lanes;
+ 	bpp = mipi_dsi_pixel_format_to_bpp(dsi->format);
+ 	if (bpp <= 0) {
+ 		DRM_DEV_ERROR(dsi->dev,
