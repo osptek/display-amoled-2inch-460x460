@@ -1,9 +1,5 @@
 <p align="left"><img alt="OSPTEK" src="./images/logo.png" width="200" /></p>
 
-<p align="center">
-  <a href="https://yy.fyi/"><img alt="Online Firmware Flasher" src="https://img.shields.io/badge/Online_Firmware_Flasher-yy.fyi-0078D4?style=for-the-badge" /></a>
-</p>
-
 <h1 align="center">OSPTEK 2″ AMOLED Display 460×460</h1>
 
 <p align="center"><b>AMOLED module · Multi-Version Index</b></p>
